@@ -224,3 +224,46 @@
          "status": "resumed"
       }
       ```
+      
+## _High-Level Architecture_
+### Key Components
+
+1. **API Gateway:**
+   * Acts as the entry point for all client requests. 
+   * Routes requests to appropriate services. 
+   * Handles authentication and rate limiting.
+
+2. **Job Scheduler Service:**
+   * Core component responsible for scheduling and managing jobs. 
+   * Interfaces with the database to store and retrieve job details. 
+   * Communicates with the Job Executor Service to trigger job execution.
+3. **Job Executor Service:**
+   * Executes jobs as per the schedule.
+   * Can scale horizontally to handle multiple job executions concurrently.
+   * Reports job status and logs back to the Job Scheduler Service.
+4. **Database:**
+   * Stores job metadata, user information, and execution logs.
+   * Relational database to ensure data consistency and support complex queries.
+5. **Monitoring and Logging System:**
+   * Collects and aggregates logs from various services. 
+   * Provides real-time monitoring and alerting for system health and job execution.
+6. **Notification Service:**
+   * Sends alerts and notifications to users about job status changes or failures.
+   * Integrates with email, SMS, or other messaging platforms.
+
+### _End-to-End Request Flow_
+1. **Job Submission:**
+   * A user submits a job request via the API Gateway. 
+   * The API Gateway authenticates the request and forwards it to the Job Scheduler Service. 
+   * The Job Scheduler Service validates the request, stores job details in the database, and schedules the job for execution. 
+2. **Job Execution:**
+   * At the scheduled time, the Job Scheduler Service triggers the Job Executor Service.
+   * The Job Executor Service retrieves job details from the database and executes the job.
+   * Upon completion, the Job Executor Service updates the job status and logs in the database.
+3. **Job Monitoring:**
+   * Users can query job status via the API Gateway. 
+   * The Job Scheduler Service retrieves the current status from the database and returns it to the user. 
+   * The Monitoring and Logging System continuously tracks job execution and system performance, sending alerts if anomalies are detected.
+4. **Notifications:**
+   * The Notification Service sends updates to users about job completion or failure.
+   * Users receive notifications through their preferred communication channels.
