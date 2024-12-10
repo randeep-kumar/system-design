@@ -267,3 +267,6 @@
 4. **Notifications:**
    * The Notification Service sends updates to users about job completion or failure.
    * Users receive notifications through their preferred communication channels.
+
+### high level design
+![high level design](./images/DistributedJobScheduler.png)
