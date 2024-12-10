@@ -107,3 +107,120 @@
 3. **Database Growth:**
    * Assuming a 10% annual increase in user base and job submissions.
    * Plan for 120 GB storage capacity for the first year, with scalability options for future growth.
+
+## _API Design_
+
+1. **Submit Job**
+    * Endpoint: POST /api/jobs
+    * Request:
+      ```json
+      {
+         "jobName": "string",
+         "jobType": "one-time | recurring",
+         "executionTime": "ISO 8601 timestamp",
+         "frequency": "string (e.g., daily, weekly)",
+         "priority": "low | medium | high",
+         "payload": "object"
+      }
+      ```
+    * Response:
+      ```json
+      {
+         "jobId": "string",
+         "status": "submitted"
+      }
+      ```
+
+2. **Update Job**
+    * Endpoint: PUT /api/jobs/{jobId}
+    * Request:
+      ```json
+      {
+         "jobName": "string",
+         "executionTime": "ISO 8601 timestamp",
+         "frequency": "string",
+         "priority": "low | medium | high",
+         "payload": "object"
+      }
+      ```
+    * Response:
+      ```json
+      {
+         "jobId": "string",
+         "status": "updated"
+      }
+      ```
+3. **Cancel Job**
+    * Endpoint: DELETE /api/jobs/{jobId}
+    * Request: None
+    * Response:
+      ```json
+      {
+         "jobId": "string",
+         "status": "cancelled"
+      }
+      ```
+4. **Get Job Status**
+    * Endpoint: GET /api/jobs/{jobId}/status
+    * Request: None
+    * Response:
+      ```json
+      {
+         "jobId": "string",
+         "status": "pending | running | completed | failed",
+         "lastUpdated": "ISO 8601 timestamp"
+      }
+      ```
+5. **List Jobs**
+    * Endpoint: GET /api/jobs
+    * Request:
+      * Query Parameters: status, type, priority, page, limit
+    * Response:
+      ```json
+      [
+         {
+            "jobId": "string",
+            "jobName": "string",
+            "status": "string",
+            "executionTime": "ISO 8601 timestamp"
+         },
+         ...
+      ]
+      ```
+
+6. **Get Job Logs**
+    * Endpoint: GET /api/jobs/{jobId}/logs
+    * Request: None
+    * Response:
+      ```json
+      {
+         "jobId": "string",
+         "logs": [
+            {
+               "timestamp": "ISO 8601 timestamp",
+               "message": "string"
+            },
+            ...
+         ]
+      }
+      ```
+7. **Pause Job**
+    * Endpoint: POST /api/jobs/{jobId}/pause
+    * Request: None
+    * Response:
+      ```json
+      {
+         "jobId": "string",
+         "status": "paused"
+      }
+      ```
+8. **Resume Job**
+    * Endpoint: POST /api/jobs/{jobId}/resume
+    * Request: None
+    * Response:
+      ```json
+      {
+         "jobId": "string",
+         "status": "resumed"
+      }
+      ```
