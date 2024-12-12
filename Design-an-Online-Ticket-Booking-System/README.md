@@ -288,47 +288,26 @@
 ## _High-Level Architecture_
 ### Key Components
 
-1. **API Gateway:**
-   * Acts as the entry point for all client requests. 
-   * Routes requests to appropriate services. 
-   * Handles authentication and rate limiting.
-2. **Job Submission Service:**
-   * Core component responsible for scheduling and managing jobs. 
-   * Interfaces with the database to store and retrieve job details. 
-   * Communicates with the Job Executor Service to trigger job execution.
-3. **Job Scheduling service**
-   * The Scheduling Service is responsible for selecting jobs for execution based on their next_run_time in the Job Schedules Table
-   * It periodically queries the table for jobs scheduled to run at the current minute:
-        ```SQl 
-          SELECT * FROM JobSchedulesTable WHERE next_run_time = 1726110000;
-        ```
-      Once the due jobs are retrieved, they are pushed to the Distributed Job Queue for worker nodes to execute.
-      Simultaneously, the status in Job Table is updated to SCHEDULED.
-4. **Distributed Job Queue**
-   * The Distributed Job Queue (e.g., Kafka, RabbitMQ) acts as a buffer between the Scheduling Service and the Execution Service, ensuring that jobs are distributed efficiently to available worker nodes. 
-   * It holds the jobs and allows the execution service to pull jobs and assign it to worker nodes.
-5. **Job Executor Service:**
-   * Executes jobs as per the schedule.
-     The Execution Service is responsible for running the jobs on worker nodes and updating the results in the Job Store.
-      It consists of a coordinator and a pool of worker nodes.
-     #### Coordinator: A coordinator (or orchestrator) node takes responsibility for:
-        * **Assigning jobs:** Distributes jobs from the queue to the available worker nodes. 
-        * **Managing worker nodes:** Tracks the status, health, capacity, and workload of active workers. 
-        * **Handling worker node failures:** Detects when a worker node fails and reassigns its jobs to other healthy nodes. 
-        * **Load balancing:** Ensures the workload is evenly distributed across worker nodes based on available resources and capacity.
-     #### Worker Nodes: Worker nodes are responsible for executing jobs and updating the Job Store with the results (e.g., completed, failed, output).
-        * When a worker is assigned a job, it creates a new entry in the Job Execution Table with the job’s status set to running and begins execution. 
-        * After execution is finished, the worker updates the job’s final status (e.g., completed or failed) along with any output in both the Jobs and Job Execution Table. 
-        * If a worker fails during execution, the coordinator re-queues the job in the distributed job queue, allowing another worker to pick it up and complete it.
-4. **Database:**
-   * Stores job metadata, user information, and execution logs.
-   * Relational database to ensure data consistency and support complex queries.
-5. **Monitoring and Logging System:**
-   * Collects and aggregates logs from various services. 
-   * Provides real-time monitoring and alerting for system health and job execution.
-6. **Notification Service:**
-   * Sends alerts and notifications to users about job status changes or failures.
-   * Integrates with email, SMS, or other messaging platforms.
+1. **Authentication Service:**
+   * **User Management**: Handles user registration, profile update, and password management.
+   * **Token Service** : Generates and validates JWT tokens for secure user sessions.
+   * **Scalability**: Stateless JWT token allow for easy scaling across multiple servers without session persistence. 
+   * Implement rate limiting to prevent brute force attacks
+2. **Booking Service:**
+   * **Availability Checker**: Verifies seat availability before booking. 
+   * **Reservation Manager**: Temporarily holds seats during the booking process.
+   * **Booking processor**: Finalise booking and update the seat availability.
+   * Implement optimistic locking to handle concurrent booking requests. 
+   * Use a distributed lock manager (e.g., Redis) to manage seat reservations.
+3. **Payment service**
+   * **Payment Gateway Integration**: interfaces with third-party payment providers.
+   * Transaction logger : Records all payments transactions for auditing and reconciliation.
+4. **Notification service**
+   * Use a message queue to manage notification requests and ensure delivery. 
+5. **Event Management Service:**
+   * **Event Catalog**: Stores and retrieves event details.
+   * Search Engine: Provides fast and efficient search capabilities.
+   * Use full-text search capabilities for event search.
 
 ### _End-to-End Request Flow_
 1. **Job Submission:**
